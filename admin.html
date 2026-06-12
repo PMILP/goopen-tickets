@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Go Open – Admin Tickets</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --blue-dark:#1F4E79;--blue-mid:#2E75B6;--blue-light:#D6E4F0;
+    --alta:#C00000;--alta-bg:#FFE0E0;--media:#C07000;--media-bg:#FFF5CC;
+    --baja:#375623;--baja-bg:#E2EFDA;--gray-50:#F8FAFC;--gray-100:#EFF3F8;
+    --gray-200:#D1DCE8;--gray-400:#8FA8C0;--gray-700:#2D3E50;--radius:10px;
+  }
+  body{font-family:'Inter',sans-serif;background:var(--gray-100);color:var(--gray-700);min-height:100vh;padding:24px 16px 48px}
+  header{background:linear-gradient(135deg,var(--blue-dark),var(--blue-mid));border-radius:var(--radius);padding:20px 28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;color:white;flex-wrap:wrap;gap:12px}
+  header h1{font-size:1.2rem;font-weight:700}
+  header p{font-size:.8rem;opacity:.8;margin-top:2px}
+  .card{background:white;border-radius:var(--radius);border:1px solid var(--gray-200);padding:24px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+  .card h2{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue-mid);margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--blue-light)}
+
+  /* Login */
+  #login-screen{max-width:380px;margin:60px auto}
+  #login-screen input{width:100%;border:1.5px solid var(--gray-200);border-radius:7px;padding:12px;font-size:.95rem;font-family:inherit;outline:none;margin-bottom:12px}
+  #login-screen input:focus{border-color:var(--blue-mid)}
+  .btn-login{width:100%;padding:12px;background:linear-gradient(135deg,var(--blue-dark),var(--blue-mid));color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;font-family:inherit;cursor:pointer}
+
+  /* Stats */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+  @media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:white;border-radius:var(--radius);border:1px solid var(--gray-200);padding:16px;text-align:center}
+  .stat .num{font-size:1.8rem;font-weight:700;color:var(--blue-mid)}
+  .stat .lbl{font-size:.72rem;color:var(--gray-400);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+
+  /* Toolbar */
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+  .toolbar select,.toolbar input{padding:8px 12px;border:1.5px solid var(--gray-200);border-radius:7px;font-size:.82rem;font-family:inherit;background:white;outline:none;color:var(--gray-700)}
+  .toolbar select:focus,.toolbar input:focus{border-color:var(--blue-mid)}
+  .btn{padding:8px 16px;border:none;border-radius:7px;font-size:.8rem;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity .15s}
+  .btn:hover{opacity:.85}
+  .btn-green{background:#375623;color:white}
+  .btn-blue{background:var(--blue-mid);color:white}
+  .btn-red{background:var(--alta);color:white}
+  .btn-gray{background:var(--gray-200);color:var(--gray-700)}
+
+  /* Table */
+  .tbl-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:.82rem}
+  thead tr{background:var(--blue-dark);color:white}
+  thead th{padding:10px 12px;text-align:left;font-weight:600;font-size:.75rem;letter-spacing:.04em;white-space:nowrap}
+  tbody tr{border-bottom:1px solid var(--gray-200);transition:background .1s}
+  tbody tr:hover{background:var(--gray-50)}
+  tbody tr.cerrado{opacity:.55}
+  tbody td{padding:10px 12px;vertical-align:middle}
+  .badge{padding:3px 9px;border-radius:20px;font-size:.7rem;font-weight:700;white-space:nowrap}
+  .badge-alta{background:var(--alta-bg);color:var(--alta)}
+  .badge-media{background:var(--media-bg);color:var(--media)}
+  .badge-baja{background:var(--baja-bg);color:var(--baja)}
+  .badge-abierto{background:#DBEAFE;color:#1E40AF}
+  .badge-proceso{background:#FEF3C7;color:#92400E}
+  .badge-cerrado{background:var(--gray-200);color:#555}
+  .badge-escalado{background:#FFE0E0;color:var(--alta)}
+  .td-actions{display:flex;gap:6px;flex-wrap:wrap}
+  .btn-sm{padding:5px 10px;border:none;border-radius:5px;font-size:.72rem;font-weight:700;font-family:inherit;cursor:pointer}
+  .btn-sm-green{background:var(--baja-bg);color:var(--baja)}
+  .btn-sm-red{background:var(--alta-bg);color:var(--alta)}
+  .empty-row td{text-align:center;padding:32px;color:var(--gray-400)}
+  .toast{display:none;border-radius:8px;padding:14px 18px;font-size:.88rem;font-weight:500;margin-bottom:16px;border-left:4px solid}
+  .toast.ok{background:var(--baja-bg);border-color:#375623;color:#375623;display:block}
+  .toast.err{background:var(--alta-bg);border-color:var(--alta);color:var(--alta);display:block}
+  .spinner{text-align:center;padding:40px;color:var(--gray-400);font-size:.9rem}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="card">
+    <h2>🔒 Acceso Administrador</h2>
+    <p style="font-size:.85rem;color:var(--gray-400);margin-bottom:16px">Ingresá la contraseña para ver los tickets.</p>
+    <input type="password" id="pwd-input" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-login" onclick="doLogin()">Ingresar →</button>
+    <p id="login-err" style="color:var(--alta);font-size:.8rem;margin-top:8px;display:none">Contraseña incorrecta.</p>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="admin-panel" style="display:none">
+  <header>
+    <div>
+      <h1>⚙️ Panel de Tickets – Go Open</h1>
+      <p id="last-update"></p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-blue" onclick="loadTickets()">🔄 Actualizar</button>
+      <button class="btn btn-green" onclick="downloadCSV()">⬇ Exportar CSV</button>
+    </div>
+  </header>
+
+  <div id="toast" class="toast"></div>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="s-total">0</div><div class="lbl">Total</div></div>
+    <div class="stat"><div class="num" id="s-abierto" style="color:var(--alta)">0</div><div class="lbl">Abiertos</div></div>
+    <div class="stat"><div class="num" id="s-proceso" style="color:var(--media)">0</div><div class="lbl">En proceso</div></div>
+    <div class="stat"><div class="num" id="s-cerrado" style="color:var(--baja)">0</div><div class="lbl">Cerrados</div></div>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <select id="fil-estado" onchange="renderTable()">
+        <option value="">Todos los estados</option>
+        <option>Abierto</option>
+        <option>En proceso</option>
+        <option>Escalado</option>
+        <option>Cerrado</option>
+      </select>
+      <select id="fil-prio" onchange="renderTable()">
+        <option value="">Todas las prioridades</option>
+        <option value="🔴 Alta">🔴 Alta</option>
+        <option value="🟡 Media">🟡 Media</option>
+        <option value="🟢 Baja">🟢 Baja</option>
+      </select>
+      <select id="fil-cat" onchange="renderTable()">
+        <option value="">Todas las categorías</option>
+        <option>ZYN</option>
+        <option>CC</option>
+      </select>
+      <input id="fil-buscar" type="text" placeholder="Buscar razón social / caso..." oninput="renderTable()" style="min-width:200px">
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Fecha</th><th>Razón Social</th><th>Posis</th>
+            <th>Merch</th><th>Categoría</th><th>Caso</th>
+            <th>Prioridad</th><th>Estado</th><th>Tiempo</th><th>Notas</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body"><tr class="empty-row"><td colspan="12">Cargando tickets...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const BIN_ID   = "6a2b587bf5f4af5e29e34c19";
+const API_KEY  = "$2a$10$vJ4lx1KLZCKs7V8rLnsqtObyp5IuKl3gwY9km98gDHlXeIxQuypeK";
+const ADMIN_PWD = "Novedad01";
+const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+let allTickets = [];
+
+function doLogin(){
+  const pwd = document.getElementById("pwd-input").value;
+  if(pwd === ADMIN_PWD){
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("admin-panel").style.display  = "block";
+    loadTickets();
+  } else {
+    document.getElementById("login-err").style.display = "block";
+  }
+}
+
+async function loadTickets(){
+  try{
+    const res = await fetch(BASE_URL+"/latest",{headers:{"X-Master-Key":API_KEY}});
+    const data = await res.json();
+    allTickets = data.record.tickets || [];
+    updateStats();
+    renderTable();
+    document.getElementById("last-update").textContent =
+      "Última actualización: " + new Date().toLocaleTimeString("es-AR");
+  }catch(e){ showToast("Error al cargar tickets.","err"); }
+}
+
+function updateStats(){
+  document.getElementById("s-total").textContent   = allTickets.length;
+  document.getElementById("s-abierto").textContent = allTickets.filter(t=>t.estado==="Abierto").length;
+  document.getElementById("s-proceso").textContent = allTickets.filter(t=>t.estado==="En proceso").length;
+  document.getElementById("s-cerrado").textContent = allTickets.filter(t=>t.estado==="Cerrado").length;
+}
+
+function renderTable(){
+  const filEst  = document.getElementById("fil-estado").value;
+  const filPrio = document.getElementById("fil-prio").value;
+  const filCat  = document.getElementById("fil-cat").value;
+  const buscar  = document.getElementById("fil-buscar").value.toLowerCase();
+
+  const filtered = allTickets.filter(t=>{
+    if(filEst  && t.estado    !== filEst)  return false;
+    if(filPrio && t.prioridad !== filPrio) return false;
+    if(filCat  && t.cat       !== filCat)  return false;
+    if(buscar  && !(`${t.razon} ${t.caso}`).toLowerCase().includes(buscar)) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById("tbl-body");
+  if(!filtered.length){
+    tbody.innerHTML='<tr class="empty-row"><td colspan="12">No hay tickets que coincidan.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(t => {
+    const badgePrio = t.prioridad.includes("Alta")?"badge-alta":t.prioridad.includes("Media")?"badge-media":"badge-baja";
+    const badgeEst  = t.estado==="Cerrado"?"badge-cerrado":t.estado==="En proceso"?"badge-proceso":t.estado==="Escalado"?"badge-escalado":"badge-abierto";
+    const esCerrado = t.estado==="Cerrado";
+    return `<tr class="${esCerrado?'cerrado':''}">
+      <td><strong>${t.id}</strong></td>
+      <td style="white-space:nowrap">${t.fecha}</td>
+      <td><strong>${t.razon}</strong></td>
+      <td style="font-size:.75rem;color:var(--gray-400)">${t.posis||""}</td>
+      <td>${t.merch}</td>
+      <td>${t.cat}</td>
+      <td>${t.caso}</td>
+      <td><span class="badge ${badgePrio}">${t.prioridad}</span></td>
+      <td><span class="badge ${badgeEst}">${t.estado}</span></td>
+      <td style="white-space:nowrap">${t.tiempo}</td>
+      <td style="font-size:.78rem;max-width:150px">${t.notas||""}</td>
+      <td>
+        <div class="td-actions">
+          ${!esCerrado?`<button class="btn-sm btn-sm-green" onclick="cerrarTicket('${t.id}')">✅ Cerrar</button>`:""}
+          <button class="btn-sm btn-sm-red" onclick="borrarTicket('${t.id}')">🗑 Borrar</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+async function cerrarTicket(id){
+  const t = allTickets.find(x=>x.id===id);
+  if(!t) return;
+  t.estado = "Cerrado";
+  t.cierre = new Date().toLocaleDateString("es-AR");
+  await saveTickets();
+  showToast(`Ticket ${id} marcado como Cerrado.`,"ok");
+}
+
+async function borrarTicket(id){
+  if(!confirm(`¿Borrar el ticket ${id}? Esta acción no se puede deshacer.`)) return;
+  allTickets = allTickets.filter(x=>x.id!==id);
+  await saveTickets();
+  showToast(`Ticket ${id} eliminado.`,"ok");
+}
+
+async function saveTickets(){
+  await fetch(BASE_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":API_KEY},body:JSON.stringify({tickets:allTickets})});
+  updateStats();
+  renderTable();
+}
+
+function downloadCSV(){
+  if(!allTickets.length){showToast("No hay tickets para exportar.","err");return;}
+  const headers=["ID Ticket","Fecha Apertura","Posis","Razón Social","Merch","Caso","Categoría","Prioridad","Estado","Responsable","Tickets Relacionados","Fecha Cierre","Tiempo Resp.(h)","Notas","Satisfacción"];
+  const rows=allTickets.map(t=>[
+    t.id,t.fecha,t.posis,t.razon,t.merch,t.caso,t.cat,
+    t.prioridad,t.estado,t.responsable,t.relacionados,
+    t.cierre,t.tiempo,t.notas,t.satisfaccion
+  ].map(v=>`"${String(v||"").replace(/"/g,'""')}"`).join(","));
+  const csv=[headers.join(","),...rows].join("\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"}));
+  a.download=`tickets_goopen_${new Date().toISOString().split("T")[0]}.csv`;
+  a.click();
+}
+
+function showToast(msg,type){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.className="toast "+type;
+  setTimeout(()=>t.className="toast",5000);
+}
+</script>
+</body>
+</html>
