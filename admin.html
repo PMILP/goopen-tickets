@@ -164,6 +164,7 @@ tbody td{padding:9px 10px;vertical-align:middle}
     <div class="tab active" onclick="showTab('tab-tickets',this)">📋 Tickets</div>
     <div class="tab" onclick="showTab('tab-dashboard',this)">📊 Dashboard</div>
     <div class="tab" onclick="showTab('tab-calendario',this)">📅 Calendario</div>
+    <div class="tab" onclick="showTab('tab-historico',this);loadHistorico()">🗂 Histórico</div>
   </div>
 
   <div id="toast" class="toast"></div>
@@ -247,6 +248,43 @@ tbody td{padding:9px 10px;vertical-align:middle}
   </div>
 </div>
 
+  <!-- TAB HISTÓRICO -->
+  <div class="tab-content" id="tab-historico">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div>
+        <p style="font-size:.82rem;color:var(--g400)">Tickets borrados — se eliminan automáticamente a los <strong>90 días</strong>.</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-green" onclick="downloadCSVHistorico()">⬇ Exportar CSV</button>
+        <button class="btn btn-red" onclick="limpiarHistorico()">🗑 Limpiar todo</button>
+      </div>
+    </div>
+    <div class="stats-grid" style="margin-bottom:16px">
+      <div class="stat-card"><div class="num" id="h-total">0</div><div class="lbl">Total archivados</div></div>
+      <div class="stat-card"><div class="num" id="h-mes" style="color:var(--bm)">0</div><div class="lbl">Últimos 30 días</div></div>
+      <div class="stat-card"><div class="num" id="h-alta" style="color:var(--alta)">0</div><div class="lbl">Alta prioridad</div></div>
+      <div class="stat-card"><div class="num" id="h-dias" style="color:var(--g400)">90</div><div class="lbl">Días de retención</div></div>
+    </div>
+    <div class="card">
+      <div class="toolbar">
+        <select id="hfil-mes" onchange="renderHistorico()">
+          <option value="">Todos los períodos</option>
+        </select>
+        <select id="hfil-cat" onchange="renderHistorico()">
+          <option value="">Todas las categorías</option>
+          <option>ZYN</option><option>CC</option>
+        </select>
+        <input id="hfil-buscar" type="text" placeholder="Buscar..." oninput="renderHistorico()" style="min-width:160px">
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Fecha Carga</th><th>Fecha Borrado</th><th>Razón Social</th><th>Nombre</th><th>Cat.</th><th>Caso</th><th>Prioridad</th><th>Estado final</th><th>Tiempo</th></tr></thead>
+          <tbody id="hist-body"><tr class="empty-row"><td colspan="10">Cargando historial...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
 <!-- MODAL CALENDARIO -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
   <div class="modal">
@@ -260,6 +298,8 @@ tbody td{padding:9px 10px;vertical-align:middle}
 const BIN_ID="6a2b587bf5f4af5e29e34c19";
 const API_KEY="$2a$10$vJ4lx1KLZCKs7V8rLnsqtObyp5IuKl3gwY9km98gDHlXeIxQuypeK";
 const BASE_URL=`https://api.jsonbin.io/v3/b/${BIN_ID}`;
+const HIST_ID="6a2f3e30da38895dfec0b4d2";
+const HIST_URL=`https://api.jsonbin.io/v3/b/${HIST_ID}`;
 
 const SUPER={user:"superadmin",pwd:"Novedad01",label:"Super Admin ⭐",isSuperAdmin:true};
 const ADMINS=[
@@ -488,9 +528,28 @@ async function cerrar(id){
   await save();showToast(`Ticket ${id} cerrado.`,"ok");
 }
 async function borrar(id){
-  if(!confirm(`¿Borrar el ticket ${id}? No se puede deshacer.`))return;
+  if(!confirm(`¿Borrar el ticket ${id}? Se guardará en el historial por 3 meses.`))return;
+  const t=allTickets.find(x=>x.id===id);
+  if(t){
+    // Save to history first
+    try{
+      const hres=await fetch(HIST_URL+"/latest",{headers:{"X-Master-Key":API_KEY}});
+      const hdata=await hres.json();
+      const hist=hdata.record.historico||[];
+      t.fechaBorrado=new Date().toLocaleDateString("es-AR");
+      t.fechaBorradoISO=new Date().toISOString().split("T")[0];
+      hist.push(t);
+      // Clean entries older than 90 days
+      const cutoff=new Date();cutoff.setDate(cutoff.getDate()-90);
+      const cleaned=hist.filter(h=>{
+        if(!h.fechaBorradoISO) return true;
+        return new Date(h.fechaBorradoISO)>cutoff;
+      });
+      await fetch(HIST_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":API_KEY},body:JSON.stringify({historico:cleaned})});
+    }catch(e){console.error("Error archivando:",e);}
+  }
   allTickets=allTickets.filter(x=>x.id!==id);
-  await save();showToast(`Ticket ${id} eliminado.`,"ok");
+  await save();showToast(`Ticket ${id} archivado y eliminado.`,"ok");
 }
 async function save(){
   await fetch(BASE_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":API_KEY},body:JSON.stringify({tickets:allTickets})});
@@ -515,6 +574,88 @@ function showTab(id,el){
 }
 
 function showToast(msg,type){const t=document.getElementById("toast");t.textContent=msg;t.className="toast "+type;setTimeout(()=>t.className="toast",5000);}
+
+// HISTORICO
+let histTickets=[];
+async function loadHistorico(){
+  try{
+    const res=await fetch(HIST_URL+"/latest",{headers:{"X-Master-Key":API_KEY}});
+    const data=await res.json();
+    let hist=data.record.historico||[];
+    // Auto-clean >90 days
+    const cutoff=new Date();cutoff.setDate(cutoff.getDate()-90);
+    const cleaned=hist.filter(h=>!h.fechaBorradoISO||new Date(h.fechaBorradoISO)>cutoff);
+    if(cleaned.length!==hist.length){
+      await fetch(HIST_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":API_KEY},body:JSON.stringify({historico:cleaned})});
+    }
+    histTickets=cleaned;
+    // Stats
+    const now=new Date();const mes30=new Date();mes30.setDate(mes30.getDate()-30);
+    document.getElementById("h-total").textContent=histTickets.length;
+    document.getElementById("h-mes").textContent=histTickets.filter(h=>h.fechaBorradoISO&&new Date(h.fechaBorradoISO)>mes30).length;
+    document.getElementById("h-alta").textContent=histTickets.filter(h=>h.prioridad&&h.prioridad.includes("Alta")).length;
+    // Populate filter
+    const meses=new Set(histTickets.map(h=>h.fechaBorradoISO?h.fechaBorradoISO.substring(0,7):"").filter(Boolean));
+    const sel=document.getElementById("hfil-mes");
+    sel.innerHTML='<option value="">Todos los períodos</option>';
+    [...meses].sort().reverse().forEach(m=>{
+      const [y,mo]=m.split("-");
+      const label=new Date(y,mo-1).toLocaleDateString("es-AR",{year:"numeric",month:"long"});
+      sel.innerHTML+=`<option value="${m}">${label}</option>`;
+    });
+    renderHistorico();
+  }catch(e){showToast("Error al cargar historial.","err");}
+}
+
+function renderHistorico(){
+  const filMes=document.getElementById("hfil-mes").value;
+  const filCat=document.getElementById("hfil-cat").value;
+  const buscar=document.getElementById("hfil-buscar").value.toLowerCase();
+  const filtered=histTickets.filter(h=>{
+    if(filMes&&!(h.fechaBorradoISO||"").startsWith(filMes)) return false;
+    if(filCat&&h.cat!==filCat) return false;
+    if(buscar&&!(`${h.razon} ${h.caso} ${h.merch}`).toLowerCase().includes(buscar)) return false;
+    return true;
+  });
+  const tbody=document.getElementById("hist-body");
+  if(!filtered.length){tbody.innerHTML='<tr class="empty-row"><td colspan="10">No hay tickets en el historial.</td></tr>';return;}
+  tbody.innerHTML=[...filtered].reverse().map(h=>{
+    const bp=h.prioridad&&h.prioridad.includes("Alta")?"b-alta":h.prioridad&&h.prioridad.includes("Media")?"b-media":"b-baja";
+    return`<tr>
+      <td><strong>${h.id||""}</strong></td>
+      <td style="white-space:nowrap">${h.fecha||""}</td>
+      <td style="white-space:nowrap;color:var(--g400)">${h.fechaBorrado||""}</td>
+      <td>${h.razon||""}</td><td>${h.merch||""}</td><td>${h.cat||""}</td>
+      <td style="max-width:150px">${h.caso||""}</td>
+      <td><span class="badge ${bp}">${h.prioridad||""}</span></td>
+      <td><span class="badge b-cerrado">${h.estado||""}</span></td>
+      <td>${h.tiempo||""}</td>
+    </tr>`;
+  }).join("");
+}
+
+function downloadCSVHistorico(){
+  if(!histTickets.length){showToast("No hay datos en el historial.","err");return;}
+  const headers=["ID Ticket","Fecha Apertura","Fecha Borrado","Posis","Razón Social","Nombre","Caso","Categoría","Prioridad","Estado","Tiempo Resp.(h)","Notas"];
+  const rows=histTickets.map(h=>[h.id,h.fecha,h.fechaBorrado,h.posis,h.razon,h.merch,h.caso,h.cat,h.prioridad,h.estado,h.tiempo,h.notas].map(v=>`"${String(v||"").replace(/"/g,'""')}"`).join(","));
+  const csv=[headers.join(","),...rows].join("
+");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"}));
+  a.download=`historico_goopen_${new Date().toISOString().split("T")[0]}.csv`;
+  a.click();
+}
+
+async function limpiarHistorico(){
+  if(!confirm("¿Borrar TODO el historial? Esta acción no se puede deshacer."))return;
+  await fetch(HIST_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":API_KEY},body:JSON.stringify({historico:[]})});
+  histTickets=[];
+  document.getElementById("h-total").textContent=0;
+  document.getElementById("h-mes").textContent=0;
+  document.getElementById("h-alta").textContent=0;
+  renderHistorico();
+  showToast("Historial limpiado correctamente.","ok");
+}
 </script>
 </body>
 </html>
