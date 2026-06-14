@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Go Open – Mis Tickets</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bd:#1F4E79;--bm:#2E75B6;--bl:#D6E4F0;--alta:#C00000;--abg:#FFE0E0;--med:#C07000;--mbg:#FFF5CC;--baja:#375623;--bbg:#E2EFDA;--g50:#F8FAFC;--g100:#EFF3F8;--g200:#D1DCE8;--g400:#8FA8C0;--g700:#2D3E50;--r:10px}
+body{font-family:'Inter',sans-serif;background:var(--g100);color:var(--g700);min-height:100vh;padding:20px 16px 48px}
+header{background:linear-gradient(135deg,var(--bd),var(--bm));border-radius:var(--r);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:14px;color:white}
+header img{height:44px;border-radius:6px}
+header h1{font-size:1.1rem;font-weight:700}
+header p{font-size:.78rem;opacity:.8;margin-top:2px}
+.card{background:white;border-radius:var(--r);border:1px solid var(--g200);padding:22px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.card h2{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--bm);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--bl)}
+.search-row{display:flex;gap:10px}
+input{flex:1;border:1.5px solid var(--g200);border-radius:7px;padding:10px 12px;font-size:.88rem;font-family:inherit;background:var(--g50);outline:none}
+input:focus{border-color:var(--bm);box-shadow:0 0 0 3px rgba(46,117,182,.1);background:white}
+.btn{padding:10px 20px;background:linear-gradient(135deg,var(--bd),var(--bm));color:white;border:none;border-radius:8px;font-size:.88rem;font-weight:700;font-family:inherit;cursor:pointer}
+.summary{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pill{font-size:.72rem;font-weight:700;padding:4px 12px;border-radius:20px;background:var(--bl);color:var(--bd)}
+.ticket-card{border:1px solid var(--g200);border-radius:8px;padding:13px 15px;margin-bottom:9px;background:var(--g50)}
+.ticket-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;flex-wrap:wrap;gap:6px}
+.tid{font-weight:700;color:var(--bm);font-size:.88rem}
+.ticket-card-body{font-size:.8rem;color:var(--g700);line-height:1.55}
+.ticket-card-body span{display:block}
+.ticket-card-body strong{color:#4A6079}
+.badges{display:flex;gap:5px;flex-wrap:wrap}
+.badge{padding:3px 9px;border-radius:20px;font-size:.68rem;font-weight:700}
+.b-alta{background:var(--abg);color:var(--alta)}
+.b-media{background:var(--mbg);color:var(--med)}
+.b-baja{background:var(--bbg);color:var(--baja)}
+.b-abierto{background:#DBEAFE;color:#1E40AF}
+.b-proceso{background:#FEF3C7;color:#92400E}
+.b-cerrado{background:var(--g200);color:#555}
+.b-escalado{background:var(--abg);color:var(--alta)}
+.empty-state{text-align:center;color:var(--g400);padding:28px;font-size:.84rem}
+.footer-links{text-align:center;margin-top:8px;font-size:.72rem}
+.footer-links a{color:var(--g400);text-decoration:none;margin:0 8px}
+/* CALENDAR */
+.cal-wrap{margin-top:16px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-header h3{font-size:.82rem;font-weight:700;color:var(--bd)}
+.cal-nav button{padding:4px 10px;background:var(--g100);border:1px solid var(--g200);border-radius:6px;cursor:pointer;font-size:.76rem;font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day-name{text-align:center;font-size:.6rem;font-weight:700;color:var(--g400);padding:3px 0;text-transform:uppercase}
+.cal-day{min-height:32px;border-radius:5px;padding:3px;font-size:.68rem;border:1px solid transparent}
+.cal-day.empty{background:transparent}
+.cal-day.today{border-color:var(--bm);background:var(--bl)}
+.cal-day .day-num{font-weight:600;color:var(--g700)}
+.cal-day.has-tickets{background:var(--bbg);border-color:var(--baja);cursor:pointer}
+.cal-day.has-tickets:hover{opacity:.8}
+.dot{width:5px;height:5px;border-radius:50%;display:inline-block;margin:1px;background:var(--bm)}
+.dot.alta{background:var(--alta)}.dot.media{background:var(--med)}.dot.baja{background:var(--baja)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:white;border-radius:var(--r);padding:20px;max-width:380px;width:90%;max-height:75vh;overflow-y:auto}
+.modal h3{font-size:.85rem;font-weight:700;color:var(--bd);margin-bottom:12px}
+.modal .ticket-mini{padding:9px;border-radius:6px;border:1px solid var(--g200);margin-bottom:7px;font-size:.78rem}
+.modal .close-btn{float:right;background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--g400)}
+</style>
+</head>
+<body>
+<header>
+  <img src="logo.jpg" alt="Go Open" onerror="this.style.display='none'">
+  <div><h1>📌 Mis Tickets</h1><p>Buscá por tu nombre para ver el estado de tus tickets</p></div>
+</header>
+
+<div class="card">
+  <h2>🔍 Buscar</h2>
+  <div class="search-row">
+    <input id="f-nombre" type="text" placeholder="Tu nombre y apellido (igual al que usaste al cargar)" onkeydown="if(event.key==='Enter')buscar()">
+    <button class="btn" onclick="buscar()">Buscar →</button>
+  </div>
+</div>
+
+<div class="card" id="results-card" style="display:none">
+  <h2 id="results-title">Resultados</h2>
+  <div class="summary" id="summary"></div>
+  <div id="ticket-list"></div>
+  <div class="cal-wrap">
+    <div class="cal-header">
+      <h3 id="cal-title-mt"></h3>
+      <div class="cal-nav" style="display:flex;gap:5px">
+        <button onclick="calNavMT(-1)">‹</button>
+        <button onclick="calNavMT(1)">›</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="cal-grid-mt"></div>
+  </div>
+</div>
+
+<div class="footer-links"><a href="index.html">← Cargar nuevo ticket</a></div>
+
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h3 id="modal-title"></h3>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const BIN_ID="6a2b587bf5f4af5e29e34c19";
+const API_KEY="$2a$10$vJ4lx1KLZCKs7V8rLnsqtObyp5IuKl3gwY9km98gDHlXeIxQuypeK";
+const BASE_URL=`https://api.jsonbin.io/v3/b/${BIN_ID}`;
+let myTs=[];
+let calYear=new Date().getFullYear();
+let calMonth=new Date().getMonth();
+
+async function buscar(){
+  const nombre=document.getElementById("f-nombre").value.trim().toLowerCase();
+  if(!nombre) return;
+  const card=document.getElementById("results-card");
+  const list=document.getElementById("ticket-list");
+  card.style.display="block";list.innerHTML='<div class="empty-state">Buscando...</div>';
+  try{
+    const res=await fetch(BASE_URL+"/latest",{headers:{"X-Master-Key":API_KEY}});
+    const data=await res.json();
+    const all=data.record.tickets||[];
+    myTs=all.filter(t=>(t.merch||"").trim().toLowerCase()===nombre);
+    document.getElementById("results-title").textContent=`Tickets de ${document.getElementById("f-nombre").value.trim()}`;
+    if(!myTs.length){list.innerHTML='<div class="empty-state">No encontramos tickets con ese nombre. Revisá que esté escrito igual que cuando lo cargaste.</div>';return;}
+    const abiertos=myTs.filter(t=>t.estado==="Abierto").length;
+    const proceso=myTs.filter(t=>t.estado==="En proceso"||t.estado==="Escalado").length;
+    const cerrados=myTs.filter(t=>t.estado==="Cerrado").length;
+    document.getElementById("summary").innerHTML=`
+      <span class="pill">Total: ${myTs.length}</span>
+      <span class="pill" style="background:#DBEAFE;color:#1E40AF">Abiertos: ${abiertos}</span>
+      <span class="pill" style="background:#FEF3C7;color:#92400E">En proceso: ${proceso}</span>
+      <span class="pill" style="background:var(--bbg);color:var(--baja)">Cerrados: ${cerrados}</span>`;
+    list.innerHTML=[...myTs].reverse().map(t=>{
+      const bp=t.prioridad&&t.prioridad.includes("Alta")?"b-alta":t.prioridad&&t.prioridad.includes("Media")?"b-media":"b-baja";
+      const be=t.estado==="Cerrado"?"b-cerrado":t.estado==="En proceso"?"b-proceso":t.estado==="Escalado"?"b-escalado":"b-abierto";
+      return`<div class="ticket-card"><div class="ticket-card-top"><span class="tid">${t.id} — ${t.fecha}</span><div class="badges"><span class="badge ${bp}">${t.prioridad}</span><span class="badge ${be}">${t.estado}</span></div></div><div class="ticket-card-body"><span><strong>Razón Social:</strong> ${t.razon}${t.posis?" | Posis: "+t.posis:""}</span><span><strong>Caso:</strong> ${t.caso}</span>${t.notas?`<span><strong>Notas:</strong> ${t.notas}</span>`:""} ${t.cierre?`<span><strong>Cerrado el:</strong> ${t.cierre}</span>`:""}</div></div>`;
+    }).join("");
+    renderCalendarMT();
+  }catch(e){list.innerHTML='<div class="empty-state">Error al buscar. Intentá de nuevo.</div>';}
+}
+
+function calNavMT(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendarMT();}
+
+function renderCalendarMT(){
+  const months=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  document.getElementById("cal-title-mt").textContent=`${months[calMonth]} ${calYear}`;
+  const grid=document.getElementById("cal-grid-mt");
+  const days=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+  let html=days.map(d=>`<div class="cal-day-name">${d}</div>`).join("");
+  const first=new Date(calYear,calMonth,1).getDay();
+  const last=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  const byDate={};
+  myTs.forEach(t=>{if(t.fechaISO){byDate[t.fechaISO]=byDate[t.fechaISO]||[];byDate[t.fechaISO].push(t);}});
+  for(let i=0;i<first;i++) html+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=last;d++){
+    const iso=`${calYear}-${String(calMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const ts=byDate[iso]||[];
+    const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
+    const dots=ts.slice(0,4).map(t=>`<span class="dot ${t.prioKey||""}"></span>`).join("");
+    html+=`<div class="cal-day ${isToday?"today":""} ${ts.length?"has-tickets":""}" ${ts.length?`onclick="showDayModal('${iso}')"`:""}><div class="day-num">${d}</div>${dots}</div>`;
+  }
+  grid.innerHTML=html;
+}
+
+function showDayModal(iso){
+  const ts=myTs.filter(t=>t.fechaISO===iso);
+  const [y,m,d]=iso.split("-");
+  const fecha=new Date(y,m-1,d).toLocaleDateString("es-AR",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  document.getElementById("modal-title").textContent=`📅 ${fecha}`;
+  document.getElementById("modal-body").innerHTML=ts.map(t=>{
+    const bp=t.prioridad&&t.prioridad.includes("Alta")?"b-alta":t.prioridad&&t.prioridad.includes("Media")?"b-media":"b-baja";
+    return`<div class="ticket-mini"><strong>${t.id}</strong> — ${t.razon}<br><span style="color:var(--g400)">${t.caso}</span><br><span class="badge ${bp}" style="font-size:.62rem">${t.prioridad}</span> <span class="badge b-abierto" style="font-size:.62rem">${t.estado}</span></div>`;
+  }).join("");
+  document.getElementById("modal-overlay").classList.add("open");
+}
+function closeModal(e){if(!e||e.target===document.getElementById("modal-overlay")) document.getElementById("modal-overlay").classList.remove("open");}
+</script>
+</body>
+</html>

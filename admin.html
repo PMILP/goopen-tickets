@@ -3,274 +3,518 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Go Open – Admin Tickets</title>
+<title>Go Open – Admin</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --blue-dark:#1F4E79;--blue-mid:#2E75B6;--blue-light:#D6E4F0;
-    --alta:#C00000;--alta-bg:#FFE0E0;--media:#C07000;--media-bg:#FFF5CC;
-    --baja:#375623;--baja-bg:#E2EFDA;--gray-50:#F8FAFC;--gray-100:#EFF3F8;
-    --gray-200:#D1DCE8;--gray-400:#8FA8C0;--gray-700:#2D3E50;--radius:10px;
-  }
-  body{font-family:'Inter',sans-serif;background:var(--gray-100);color:var(--gray-700);min-height:100vh;padding:24px 16px 48px}
-  header{background:linear-gradient(135deg,var(--blue-dark),var(--blue-mid));border-radius:var(--radius);padding:20px 28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;color:white;flex-wrap:wrap;gap:12px}
-  header h1{font-size:1.2rem;font-weight:700}
-  header p{font-size:.8rem;opacity:.8;margin-top:2px}
-  .card{background:white;border-radius:var(--radius);border:1px solid var(--gray-200);padding:24px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
-  .card h2{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue-mid);margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--blue-light)}
-
-  /* Login */
-  #login-screen{max-width:380px;margin:60px auto}
-  #login-screen input{width:100%;border:1.5px solid var(--gray-200);border-radius:7px;padding:12px;font-size:.95rem;font-family:inherit;outline:none;margin-bottom:12px}
-  #login-screen input:focus{border-color:var(--blue-mid)}
-  .btn-login{width:100%;padding:12px;background:linear-gradient(135deg,var(--blue-dark),var(--blue-mid));color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;font-family:inherit;cursor:pointer}
-
-  /* Stats */
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-  @media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
-  .stat{background:white;border-radius:var(--radius);border:1px solid var(--gray-200);padding:16px;text-align:center}
-  .stat .num{font-size:1.8rem;font-weight:700;color:var(--blue-mid)}
-  .stat .lbl{font-size:.72rem;color:var(--gray-400);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
-
-  /* Toolbar */
-  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
-  .toolbar select,.toolbar input{padding:8px 12px;border:1.5px solid var(--gray-200);border-radius:7px;font-size:.82rem;font-family:inherit;background:white;outline:none;color:var(--gray-700)}
-  .toolbar select:focus,.toolbar input:focus{border-color:var(--blue-mid)}
-  .btn{padding:8px 16px;border:none;border-radius:7px;font-size:.8rem;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity .15s}
-  .btn:hover{opacity:.85}
-  .btn-green{background:#375623;color:white}
-  .btn-blue{background:var(--blue-mid);color:white}
-  .btn-red{background:var(--alta);color:white}
-  .btn-gray{background:var(--gray-200);color:var(--gray-700)}
-
-  /* Table */
-  .tbl-wrap{overflow-x:auto}
-  table{width:100%;border-collapse:collapse;font-size:.82rem}
-  thead tr{background:var(--blue-dark);color:white}
-  thead th{padding:10px 12px;text-align:left;font-weight:600;font-size:.75rem;letter-spacing:.04em;white-space:nowrap}
-  tbody tr{border-bottom:1px solid var(--gray-200);transition:background .1s}
-  tbody tr:hover{background:var(--gray-50)}
-  tbody tr.cerrado{opacity:.55}
-  tbody td{padding:10px 12px;vertical-align:middle}
-  .badge{padding:3px 9px;border-radius:20px;font-size:.7rem;font-weight:700;white-space:nowrap}
-  .badge-alta{background:var(--alta-bg);color:var(--alta)}
-  .badge-media{background:var(--media-bg);color:var(--media)}
-  .badge-baja{background:var(--baja-bg);color:var(--baja)}
-  .badge-abierto{background:#DBEAFE;color:#1E40AF}
-  .badge-proceso{background:#FEF3C7;color:#92400E}
-  .badge-cerrado{background:var(--gray-200);color:#555}
-  .badge-escalado{background:#FFE0E0;color:var(--alta)}
-  .td-actions{display:flex;gap:6px;flex-wrap:wrap}
-  .btn-sm{padding:5px 10px;border:none;border-radius:5px;font-size:.72rem;font-weight:700;font-family:inherit;cursor:pointer}
-  .btn-sm-green{background:var(--baja-bg);color:var(--baja)}
-  .btn-sm-red{background:var(--alta-bg);color:var(--alta)}
-  .empty-row td{text-align:center;padding:32px;color:var(--gray-400)}
-  .toast{display:none;border-radius:8px;padding:14px 18px;font-size:.88rem;font-weight:500;margin-bottom:16px;border-left:4px solid}
-  .toast.ok{background:var(--baja-bg);border-color:#375623;color:#375623;display:block}
-  .toast.err{background:var(--alta-bg);border-color:var(--alta);color:var(--alta);display:block}
-  .spinner{text-align:center;padding:40px;color:var(--gray-400);font-size:.9rem}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bd:#1F4E79;--bm:#2E75B6;--bl:#D6E4F0;--alta:#C00000;--abg:#FFE0E0;--med:#C07000;--mbg:#FFF5CC;--baja:#375623;--bbg:#E2EFDA;--g50:#F8FAFC;--g100:#EFF3F8;--g200:#D1DCE8;--g400:#8FA8C0;--g700:#2D3E50;--r:10px}
+body{font-family:'Inter',sans-serif;background:var(--g100);color:var(--g700);min-height:100vh;padding:0}
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:white;border-radius:var(--r);border:1px solid var(--g200);padding:32px;width:100%;max-width:400px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.login-card .logo-wrap{text-align:center;margin-bottom:20px}
+.login-card .logo-wrap img{height:50px;border-radius:8px}
+.login-card h2{font-size:1.1rem;font-weight:700;color:var(--bd);margin-bottom:4px;text-align:center}
+.login-card p{font-size:.8rem;color:var(--g400);text-align:center;margin-bottom:20px}
+.login-card label{display:block;font-size:.76rem;font-weight:600;color:#4A6079;margin-bottom:4px;margin-top:12px}
+.login-card input{width:100%;border:1.5px solid var(--g200);border-radius:7px;padding:10px 12px;font-size:.9rem;font-family:inherit;outline:none}
+.login-card input:focus{border-color:var(--bm)}
+.btn-login{width:100%;margin-top:16px;padding:12px;background:linear-gradient(135deg,var(--bd),var(--bm));color:white;border:none;border-radius:8px;font-size:.95rem;font-weight:700;font-family:inherit;cursor:pointer}
+.login-err{color:var(--alta);font-size:.78rem;margin-top:8px;display:none;text-align:center}
+/* PANEL */
+#admin-panel{display:none}
+header{background:linear-gradient(135deg,var(--bd),var(--bm));padding:16px 24px;display:flex;align-items:center;justify-content:space-between;color:white;flex-wrap:wrap;gap:10px}
+header .hd-left{display:flex;align-items:center;gap:12px}
+header img{height:36px;border-radius:6px}
+header h1{font-size:1rem;font-weight:700}
+header .role-badge{font-size:.7rem;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;margin-top:2px;display:inline-block}
+.hd-btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:7px 14px;border:none;border-radius:7px;font-size:.78rem;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn-blue{background:var(--bm);color:white}
+.btn-green{background:var(--baja);color:white}
+.btn-red{background:var(--alta);color:white}
+.btn-gray{background:var(--g200);color:var(--g700)}
+.btn-logout{background:rgba(255,255,255,.2);color:white;border:1px solid rgba(255,255,255,.3)}
+/* TABS */
+.tabs{background:white;border-bottom:2px solid var(--g200);display:flex;padding:0 24px}
+.tab{padding:12px 18px;font-size:.82rem;font-weight:600;color:var(--g400);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s}
+.tab.active{color:var(--bm);border-color:var(--bm)}
+.tab-content{display:none;padding:20px 24px}
+.tab-content.active{display:block}
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:700px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:white;border-radius:var(--r);border:1px solid var(--g200);padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.stat-card .num{font-size:1.8rem;font-weight:700;color:var(--bm)}
+.stat-card .lbl{font-size:.7rem;color:var(--g400);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+/* MINI STATS */
+.mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:640px){.mini-stats{grid-template-columns:1fr}}
+.mini-block{background:white;border-radius:var(--r);border:1px solid var(--g200);padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.mini-block h3{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--bm);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--bl)}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:.78rem}
+.bar-label{min-width:90px;color:var(--g700);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px}
+.bar-track{flex:1;height:10px;background:var(--g100);border-radius:6px;overflow:hidden;border:1px solid var(--g200)}
+.bar-fill{height:100%;border-radius:6px;background:var(--bm);transition:width .6s cubic-bezier(.4,0,.2,1)}
+.bar-num{min-width:24px;text-align:right;font-weight:700;font-size:.82rem;color:var(--g700)}
+.bar-pct{min-width:32px;text-align:right;font-size:.68rem;color:var(--g400)}
+/* DONUT */
+.donut-wrap{display:flex;align-items:center;gap:16px;padding:8px 0}
+.donut-svg{flex-shrink:0}
+.donut-legend{flex:1}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:.76rem;margin-bottom:5px}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+/* CALENDAR */
+.cal-wrap{background:white;border-radius:var(--r);border:1px solid var(--g200);padding:16px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-header h3{font-size:.85rem;font-weight:700;color:var(--bd)}
+.cal-nav{display:flex;gap:6px}
+.cal-nav button{padding:4px 10px;background:var(--g100);border:1px solid var(--g200);border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-day-name{text-align:center;font-size:.65rem;font-weight:700;color:var(--g400);padding:4px 0;text-transform:uppercase}
+.cal-day{min-height:36px;border-radius:6px;padding:4px;font-size:.72rem;cursor:default;position:relative;border:1px solid transparent}
+.cal-day.empty{background:transparent}
+.cal-day.today{border-color:var(--bm);background:var(--bl)}
+.cal-day .day-num{font-weight:600;color:var(--g700)}
+.cal-day.has-tickets{background:var(--g50);border-color:var(--g200);cursor:pointer}
+.cal-day.has-tickets:hover{background:var(--bl)}
+.cal-day .dot{width:6px;height:6px;background:var(--bm);border-radius:50%;display:inline-block;margin:1px}
+.cal-day .dot.alta{background:var(--alta)}
+.cal-day .dot.media{background:var(--med)}
+.cal-day .dot.baja{background:var(--baja)}
+/* TABLE */
+.card{background:white;border-radius:var(--r);border:1px solid var(--g200);padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card h2{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--bm);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--bl)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.toolbar select,.toolbar input{padding:7px 10px;border:1.5px solid var(--g200);border-radius:7px;font-size:.8rem;font-family:inherit;background:white;outline:none}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+thead tr{background:var(--bd);color:white}
+thead th{padding:9px 10px;text-align:left;font-weight:600;font-size:.72rem;letter-spacing:.04em;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--g200);transition:background .1s}
+tbody tr:hover{background:var(--g50)}
+tbody tr.cerrado{opacity:.5}
+tbody td{padding:9px 10px;vertical-align:middle}
+.badge{padding:3px 9px;border-radius:20px;font-size:.68rem;font-weight:700;white-space:nowrap}
+.b-alta{background:var(--abg);color:var(--alta)}
+.b-media{background:var(--mbg);color:var(--med)}
+.b-baja{background:var(--bbg);color:var(--baja)}
+.b-abierto{background:#DBEAFE;color:#1E40AF}
+.b-proceso{background:#FEF3C7;color:#92400E}
+.b-cerrado{background:var(--g200);color:#555}
+.b-escalado{background:var(--abg);color:var(--alta)}
+.td-actions{display:flex;gap:5px;flex-wrap:wrap}
+.btn-sm{padding:4px 8px;border:none;border-radius:5px;font-size:.68rem;font-weight:700;font-family:inherit;cursor:pointer}
+.btn-sm-green{background:var(--bbg);color:var(--baja)}
+.btn-sm-red{background:var(--abg);color:var(--alta)}
+.btn-sm-blue{background:var(--bl);color:var(--bd)}
+.empty-row td{text-align:center;padding:28px;color:var(--g400)}
+.toast{display:none;border-radius:8px;padding:12px 16px;font-size:.84rem;font-weight:500;margin-bottom:14px;border-left:4px solid}
+.toast.ok{background:var(--bbg);border-color:var(--baja);color:var(--baja);display:block}
+.toast.err{background:var(--abg);border-color:var(--alta);color:var(--alta);display:block}
+/* MES FILTER */
+.mes-filter{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.mes-filter label{font-size:.78rem;font-weight:600;color:var(--g400)}
+.mes-filter select{padding:6px 10px;border:1.5px solid var(--g200);border-radius:7px;font-size:.8rem;font-family:inherit}
+/* MODAL CAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:white;border-radius:var(--r);padding:20px;max-width:420px;width:90%;max-height:80vh;overflow-y:auto}
+.modal h3{font-size:.9rem;font-weight:700;color:var(--bd);margin-bottom:14px}
+.modal .ticket-mini{padding:10px;border-radius:7px;border:1px solid var(--g200);margin-bottom:8px;font-size:.8rem}
+.modal .close-btn{float:right;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--g400)}
 </style>
 </head>
 <body>
 
 <!-- LOGIN -->
 <div id="login-screen">
-  <div class="card">
-    <h2>🔒 Acceso Administrador</h2>
-    <p style="font-size:.85rem;color:var(--gray-400);margin-bottom:16px">Ingresá la contraseña para ver los tickets.</p>
-    <input type="password" id="pwd-input" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+  <div class="login-card">
+    <div class="logo-wrap"><img src="logo.jpg" alt="Go Open" onerror="this.style.display='none'"></div>
+    <h2>Go Open – Panel Admin</h2>
+    <p>Ingresá tus credenciales para acceder</p>
+    <label>Usuario</label>
+    <input type="text" id="inp-user" placeholder="Usuario" onkeydown="if(event.key==='Enter')doLogin()">
+    <label>Contraseña</label>
+    <input type="password" id="inp-pwd" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="btn-login" onclick="doLogin()">Ingresar →</button>
-    <p id="login-err" style="color:var(--alta);font-size:.8rem;margin-top:8px;display:none">Contraseña incorrecta.</p>
+    <p class="login-err" id="login-err">Usuario o contraseña incorrectos.</p>
   </div>
 </div>
 
-<!-- ADMIN PANEL -->
-<div id="admin-panel" style="display:none">
+<!-- PANEL -->
+<div id="admin-panel">
   <header>
-    <div>
-      <h1>⚙️ Panel de Tickets – Go Open</h1>
-      <p id="last-update"></p>
+    <div class="hd-left">
+      <img src="logo.jpg" alt="Go Open" onerror="this.style.display='none'">
+      <div>
+        <h1>Go Open – Panel Admin</h1>
+        <span class="role-badge" id="role-badge">Cargando...</span>
+      </div>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <div class="hd-btns">
       <button class="btn btn-blue" onclick="loadTickets()">🔄 Actualizar</button>
-      <button class="btn btn-green" onclick="downloadCSV()">⬇ Exportar CSV</button>
+      <button class="btn btn-green" onclick="downloadCSV()">⬇ CSV</button>
+      <button class="btn btn-logout" onclick="logout()">Salir</button>
     </div>
   </header>
 
-  <div id="toast" class="toast"></div>
-
-  <div class="stats">
-    <div class="stat"><div class="num" id="s-total">0</div><div class="lbl">Total</div></div>
-    <div class="stat"><div class="num" id="s-abierto" style="color:var(--alta)">0</div><div class="lbl">Abiertos</div></div>
-    <div class="stat"><div class="num" id="s-proceso" style="color:var(--media)">0</div><div class="lbl">En proceso</div></div>
-    <div class="stat"><div class="num" id="s-cerrado" style="color:var(--baja)">0</div><div class="lbl">Cerrados</div></div>
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('tab-tickets',this)">📋 Tickets</div>
+    <div class="tab" onclick="showTab('tab-dashboard',this)">📊 Dashboard</div>
+    <div class="tab" onclick="showTab('tab-calendario',this)">📅 Calendario</div>
   </div>
 
-  <div class="card">
-    <div class="toolbar">
-      <select id="fil-estado" onchange="renderTable()">
-        <option value="">Todos los estados</option>
-        <option>Abierto</option>
-        <option>En proceso</option>
-        <option>Escalado</option>
-        <option>Cerrado</option>
-      </select>
-      <select id="fil-prio" onchange="renderTable()">
-        <option value="">Todas las prioridades</option>
-        <option value="🔴 Alta">🔴 Alta</option>
-        <option value="🟡 Media">🟡 Media</option>
-        <option value="🟢 Baja">🟢 Baja</option>
-      </select>
-      <select id="fil-cat" onchange="renderTable()">
-        <option value="">Todas las categorías</option>
-        <option>ZYN</option>
-        <option>CC</option>
-      </select>
-      <input id="fil-buscar" type="text" placeholder="Buscar razón social / caso..." oninput="renderTable()" style="min-width:200px">
-    </div>
+  <div id="toast" class="toast"></div>
 
-    <div class="tbl-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th><th>Fecha</th><th>Razón Social</th><th>Posis</th>
-            <th>Merch</th><th>Categoría</th><th>Caso</th>
-            <th>Prioridad</th><th>Estado</th><th>Tiempo</th><th>Notas</th><th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tbl-body"><tr class="empty-row"><td colspan="12">Cargando tickets...</td></tr></tbody>
-      </table>
+  <!-- TAB TICKETS -->
+  <div class="tab-content active" id="tab-tickets">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="num" id="s-total">0</div><div class="lbl">Total</div></div>
+      <div class="stat-card"><div class="num" id="s-abierto" style="color:var(--alta)">0</div><div class="lbl">Abiertos</div></div>
+      <div class="stat-card"><div class="num" id="s-proceso" style="color:var(--med)">0</div><div class="lbl">En proceso</div></div>
+      <div class="stat-card"><div class="num" id="s-cerrado" style="color:var(--baja)">0</div><div class="lbl">Cerrados</div></div>
     </div>
+    <div class="card">
+      <div class="toolbar">
+        <select id="fil-estado" onchange="renderTable()"><option value="">Todos los estados</option><option>Abierto</option><option>En proceso</option><option>Escalado</option><option>Cerrado</option></select>
+        <select id="fil-prio" onchange="renderTable()"><option value="">Todas las prioridades</option><option value="🔴 Alta">🔴 Alta</option><option value="🟡 Media">🟡 Media</option><option value="🟢 Baja">🟢 Baja</option></select>
+        <select id="fil-cat" onchange="renderTable()"><option value="">Todas las categorías</option><option>ZYN</option><option>CC</option></select>
+        <input id="fil-buscar" type="text" placeholder="Buscar..." oninput="renderTable()" style="min-width:160px">
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Fecha</th><th>Razón Social</th><th>Posis</th><th>Nombre</th><th>Cat.</th><th>Caso</th><th>Prioridad</th><th>Estado</th><th>Tiempo</th><th>Notas</th><th>Acciones</th></tr></thead>
+          <tbody id="tbl-body"><tr class="empty-row"><td colspan="12">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB DASHBOARD -->
+  <div class="tab-content" id="tab-dashboard">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <div class="mes-filter" style="margin:0"><label>Período:</label>
+        <select id="fil-mes" onchange="renderDashboard()"><option value="">Todos los meses</option></select>
+      </div>
+      <span id="dash-update" style="font-size:.72rem;color:var(--g400);margin-left:auto"></span>
+    </div>
+    <!-- KPI CARDS -->
+    <div class="stats-grid" id="dash-stats"></div>
+    <!-- FILA 1 -->
+    <div class="mini-stats">
+      <div class="mini-block">
+        <h3>📂 Por Categoría</h3>
+        <div id="dash-cat"></div>
+      </div>
+      <div class="mini-block">
+        <h3>🚦 Por Prioridad</h3>
+        <div id="dash-prio-donut"></div>
+      </div>
+    </div>
+    <!-- FILA 2 -->
+    <div class="mini-stats">
+      <div class="mini-block">
+        <h3>📌 Por Estado</h3>
+        <div id="dash-estado"></div>
+      </div>
+      <div class="mini-block">
+        <h3>👤 Por Persona</h3>
+        <div id="dash-merch"></div>
+      </div>
+    </div>
+    <!-- FILA 3: tendencia mensual -->
+    <div class="mini-block" style="margin-bottom:16px">
+      <h3>📈 Tickets por mes</h3>
+      <div id="dash-trend" style="display:flex;align-items:flex-end;gap:6px;height:80px;padding-top:8px"></div>
+      <div id="dash-trend-labels" style="display:flex;gap:6px;margin-top:4px"></div>
+    </div>
+  </div>
+
+  <!-- TAB CALENDARIO -->
+  <div class="tab-content" id="tab-calendario">
+    <div class="cal-wrap">
+      <div class="cal-header">
+        <h3 id="cal-title"></h3>
+        <div class="cal-nav">
+          <button onclick="calNav(-1)">‹ Anterior</button>
+          <button onclick="calNav(1)">Siguiente ›</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CALENDARIO -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h3 id="modal-title"></h3>
+    <div id="modal-body"></div>
   </div>
 </div>
 
 <script>
-const BIN_ID   = "6a2b587bf5f4af5e29e34c19";
-const API_KEY  = "$2a$10$vJ4lx1KLZCKs7V8rLnsqtObyp5IuKl3gwY9km98gDHlXeIxQuypeK";
-const ADMIN_PWD = "Novedad01";
-const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+const BIN_ID="6a2b587bf5f4af5e29e34c19";
+const API_KEY="$2a$10$vJ4lx1KLZCKs7V8rLnsqtObyp5IuKl3gwY9km98gDHlXeIxQuypeK";
+const BASE_URL=`https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
-let allTickets = [];
+const SUPER={user:"superadmin",pwd:"Novedad01",label:"Super Admin ⭐",isSuperAdmin:true};
+const ADMINS=[
+  {user:"luciano",pwd:"Goopen01",label:"Luciano Pisarello",merchs:[]},
+  // Agregá más admins acá: {user:"nombre",pwd:"clave",label:"Nombre Completo",merchs:["Merch1","Merch2"]}
+];
+
+let currentAdmin=null;
+let allTickets=[];
+let calYear=new Date().getFullYear();
+let calMonth=new Date().getMonth();
 
 function doLogin(){
-  const pwd = document.getElementById("pwd-input").value;
-  if(pwd === ADMIN_PWD){
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("admin-panel").style.display  = "block";
-    loadTickets();
-  } else {
-    document.getElementById("login-err").style.display = "block";
-  }
+  const user=document.getElementById("inp-user").value.trim().toLowerCase();
+  const pwd=document.getElementById("inp-pwd").value;
+  let found=null;
+  if(user===SUPER.user&&pwd===SUPER.pwd) found=SUPER;
+  else found=ADMINS.find(a=>a.user===user&&a.pwd===pwd)||null;
+  if(!found){document.getElementById("login-err").style.display="block";return;}
+  currentAdmin=found;
+  document.getElementById("login-screen").style.display="none";
+  document.getElementById("admin-panel").style.display="block";
+  document.getElementById("role-badge").textContent=found.label+(found.isSuperAdmin?" – Ve todos los tickets":" – Mis tickets");
+  loadTickets();
+}
+function logout(){currentAdmin=null;document.getElementById("login-screen").style.display="flex";document.getElementById("admin-panel").style.display="none";}
+
+function myTickets(){
+  if(!currentAdmin) return [];
+  if(currentAdmin.isSuperAdmin) return allTickets;
+  if(!currentAdmin.merchs||!currentAdmin.merchs.length) return allTickets;
+  return allTickets.filter(t=>currentAdmin.merchs.some(m=>(t.merch||"").toLowerCase().includes(m.toLowerCase())));
 }
 
 async function loadTickets(){
   try{
-    const res = await fetch(BASE_URL+"/latest",{headers:{"X-Master-Key":API_KEY}});
-    const data = await res.json();
-    allTickets = data.record.tickets || [];
-    updateStats();
-    renderTable();
-    document.getElementById("last-update").textContent =
-      "Última actualización: " + new Date().toLocaleTimeString("es-AR");
-  }catch(e){ showToast("Error al cargar tickets.","err"); }
+    const res=await fetch(BASE_URL+"/latest",{headers:{"X-Master-Key":API_KEY}});
+    const data=await res.json();
+    allTickets=data.record.tickets||[];
+    updateStats();renderTable();renderDashboard();renderCalendar();
+    populateMesFil();
+  }catch(e){showToast("Error al cargar tickets.","err");}
 }
 
 function updateStats(){
-  document.getElementById("s-total").textContent   = allTickets.length;
-  document.getElementById("s-abierto").textContent = allTickets.filter(t=>t.estado==="Abierto").length;
-  document.getElementById("s-proceso").textContent = allTickets.filter(t=>t.estado==="En proceso").length;
-  document.getElementById("s-cerrado").textContent = allTickets.filter(t=>t.estado==="Cerrado").length;
+  const t=myTickets();
+  document.getElementById("s-total").textContent=t.length;
+  document.getElementById("s-abierto").textContent=t.filter(x=>x.estado==="Abierto").length;
+  document.getElementById("s-proceso").textContent=t.filter(x=>x.estado==="En proceso").length;
+  document.getElementById("s-cerrado").textContent=t.filter(x=>x.estado==="Cerrado").length;
+}
+
+function getFiltered(){
+  const filEst=document.getElementById("fil-estado").value;
+  const filPrio=document.getElementById("fil-prio").value;
+  const filCat=document.getElementById("fil-cat").value;
+  const buscar=document.getElementById("fil-buscar").value.toLowerCase();
+  return myTickets().filter(t=>{
+    if(filEst&&t.estado!==filEst) return false;
+    if(filPrio&&t.prioridad!==filPrio) return false;
+    if(filCat&&t.cat!==filCat) return false;
+    if(buscar&&!(`${t.razon} ${t.caso} ${t.merch}`).toLowerCase().includes(buscar)) return false;
+    return true;
+  });
 }
 
 function renderTable(){
-  const filEst  = document.getElementById("fil-estado").value;
-  const filPrio = document.getElementById("fil-prio").value;
-  const filCat  = document.getElementById("fil-cat").value;
-  const buscar  = document.getElementById("fil-buscar").value.toLowerCase();
-
-  const filtered = allTickets.filter(t=>{
-    if(filEst  && t.estado    !== filEst)  return false;
-    if(filPrio && t.prioridad !== filPrio) return false;
-    if(filCat  && t.cat       !== filCat)  return false;
-    if(buscar  && !(`${t.razon} ${t.caso}`).toLowerCase().includes(buscar)) return false;
-    return true;
-  });
-
-  const tbody = document.getElementById("tbl-body");
-  if(!filtered.length){
-    tbody.innerHTML='<tr class="empty-row"><td colspan="12">No hay tickets que coincidan.</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = filtered.map(t => {
-    const badgePrio = t.prioridad.includes("Alta")?"badge-alta":t.prioridad.includes("Media")?"badge-media":"badge-baja";
-    const badgeEst  = t.estado==="Cerrado"?"badge-cerrado":t.estado==="En proceso"?"badge-proceso":t.estado==="Escalado"?"badge-escalado":"badge-abierto";
-    const esCerrado = t.estado==="Cerrado";
-    return `<tr class="${esCerrado?'cerrado':''}">
-      <td><strong>${t.id}</strong></td>
-      <td style="white-space:nowrap">${t.fecha}</td>
-      <td><strong>${t.razon}</strong></td>
-      <td style="font-size:.75rem;color:var(--gray-400)">${t.posis||""}</td>
-      <td>${t.merch}</td>
-      <td>${t.cat}</td>
-      <td>${t.caso}</td>
-      <td><span class="badge ${badgePrio}">${t.prioridad}</span></td>
-      <td><span class="badge ${badgeEst}">${t.estado}</span></td>
-      <td style="white-space:nowrap">${t.tiempo}</td>
-      <td style="font-size:.78rem;max-width:150px">${t.notas||""}</td>
-      <td>
-        <div class="td-actions">
-          ${!esCerrado?`<button class="btn-sm btn-sm-green" onclick="cerrarTicket('${t.id}')">✅ Cerrar</button>`:""}
-          <button class="btn-sm btn-sm-red" onclick="borrarTicket('${t.id}')">🗑 Borrar</button>
-        </div>
-      </td>
+  const filtered=getFiltered();
+  const tbody=document.getElementById("tbl-body");
+  if(!filtered.length){tbody.innerHTML='<tr class="empty-row"><td colspan="12">No hay tickets que coincidan.</td></tr>';return;}
+  tbody.innerHTML=filtered.map(t=>{
+    const bp=t.prioridad&&t.prioridad.includes("Alta")?"b-alta":t.prioridad&&t.prioridad.includes("Media")?"b-media":"b-baja";
+    const be=t.estado==="Cerrado"?"b-cerrado":t.estado==="En proceso"?"b-proceso":t.estado==="Escalado"?"b-escalado":"b-abierto";
+    return`<tr class="${t.estado==="Cerrado"?"cerrado":""}">
+      <td><strong>${t.id}</strong></td><td style="white-space:nowrap">${t.fecha}</td>
+      <td><strong>${t.razon}</strong></td><td style="font-size:.72rem;color:var(--g400)">${t.posis||""}</td>
+      <td>${t.merch||""}</td><td>${t.cat||""}</td><td style="max-width:160px">${t.caso||""}</td>
+      <td><span class="badge ${bp}">${t.prioridad||""}</span></td>
+      <td><span class="badge ${be}">${t.estado||""}</span></td>
+      <td style="white-space:nowrap">${t.tiempo||""}</td>
+      <td style="max-width:130px;font-size:.76rem">${t.notas||""}</td>
+      <td><div class="td-actions">
+        ${t.estado!=="Cerrado"?`<button class="btn-sm btn-sm-green" onclick="cerrar('${t.id}')">✅ Cerrar</button>`:""}
+        <button class="btn-sm btn-sm-red" onclick="borrar('${t.id}')">🗑</button>
+      </div></td>
     </tr>`;
   }).join("");
 }
 
-async function cerrarTicket(id){
-  const t = allTickets.find(x=>x.id===id);
-  if(!t) return;
-  t.estado = "Cerrado";
-  t.cierre = new Date().toLocaleDateString("es-AR");
-  await saveTickets();
-  showToast(`Ticket ${id} marcado como Cerrado.`,"ok");
+// DASHBOARD
+function populateMesFil(){
+  const meses=new Set(myTickets().map(t=>t.fechaISO?t.fechaISO.substring(0,7):"").filter(Boolean));
+  const sel=document.getElementById("fil-mes");
+  const cur=sel.value;
+  sel.innerHTML='<option value="">Todos los meses</option>';
+  [...meses].sort().reverse().forEach(m=>{
+    const [y,mo]=m.split("-");
+    const label=new Date(y,mo-1).toLocaleDateString("es-AR",{year:"numeric",month:"long"});
+    sel.innerHTML+=`<option value="${m}" ${m===cur?"selected":""}>${label}</option>`;
+  });
+}
+function getDashTickets(){
+  const mes=document.getElementById("fil-mes").value;
+  const base=myTickets();
+  if(!mes) return base;
+  return base.filter(t=>(t.fechaISO||"").startsWith(mes));
+}
+function count(arr,key){
+  const m={};
+  arr.forEach(t=>{const v=t[key]||"Sin dato";m[v]=(m[v]||0)+1;});
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]);
+}
+function barHTML(items,total,colorFn){
+  return items.map(([k,v])=>{
+    const pct=total?Math.round(v/total*100):0;
+    return`<div class="bar-row">
+      <span class="bar-label" title="${k}">${k}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colorFn(k)}"></div></div>
+      <span class="bar-num">${v}</span>
+      <span class="bar-pct">${pct}%</span>
+    </div>`;
+  }).join("");
+}
+function donutHTML(items,total,colorFn){
+  if(!total) return '<p style="color:var(--g400);font-size:.8rem;text-align:center;padding:16px">Sin datos</p>';
+  // SVG donut
+  const r=36,cx=44,cy=44,stroke=14;
+  const circ=2*Math.PI*r;
+  let offset=0;
+  let paths="";
+  items.forEach(([k,v])=>{
+    const pct=v/total;
+    const dash=pct*circ;
+    paths+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${colorFn(k)}" stroke-width="${stroke}" stroke-dasharray="${dash.toFixed(1)} ${(circ-dash).toFixed(1)}" stroke-dashoffset="${-offset.toFixed(1)}" style="transition:stroke-dasharray .5s"/>`;
+    offset+=dash;
+  });
+  const legend=items.map(([k,v])=>`<div class="legend-item"><span class="legend-dot" style="background:${colorFn(k)}"></span><span style="flex:1">${k}</span><strong>${v}</strong></div>`).join("");
+  return`<div class="donut-wrap">
+    <svg class="donut-svg" width="88" height="88" viewBox="0 0 88 88">${paths}<text x="44" y="44" text-anchor="middle" dy=".35em" font-size="13" font-weight="700" fill="var(--g700)">${total}</text></svg>
+    <div class="donut-legend">${legend}</div>
+  </div>`;
+}
+function trendHTML(tickets){
+  // group by month
+  const by={};
+  tickets.forEach(t=>{if(t.fechaISO){const m=t.fechaISO.substring(0,7);by[m]=(by[m]||0)+1;}});
+  const keys=Object.keys(by).sort().slice(-6);
+  if(!keys.length){document.getElementById("dash-trend").innerHTML='<p style="color:var(--g400);font-size:.8rem">Sin datos</p>';return;}
+  const max=Math.max(...keys.map(k=>by[k]));
+  const barW=`calc(${Math.floor(100/keys.length)}% - 6px)`;
+  document.getElementById("dash-trend").innerHTML=keys.map(k=>{
+    const h=max?Math.round((by[k]/max)*70)+10:10;
+    return`<div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:2px">
+      <span style="font-size:.68rem;color:var(--g400);font-weight:700">${by[k]}</span>
+      <div style="width:100%;height:${h}px;background:linear-gradient(180deg,var(--bm),var(--bd));border-radius:5px 5px 2px 2px"></div>
+    </div>`;
+  }).join("");
+  document.getElementById("dash-trend-labels").innerHTML=keys.map(k=>{
+    const [y,m]=k.split("-");
+    const label=new Date(y,m-1).toLocaleDateString("es-AR",{month:"short"});
+    return`<div style="flex:1;text-align:center;font-size:.65rem;color:var(--g400)">${label}</div>`;
+  }).join("");
+}
+function renderDashboard(){
+  const t=getDashTickets();const total=t.length;
+  const resol=total?Math.round(t.filter(x=>x.estado==="Cerrado").length/total*100):0;
+  const alta=t.filter(x=>x.prioridad&&x.prioridad.includes("Alta")).length;
+  document.getElementById("dash-stats").innerHTML=`
+    <div class="stat-card"><div class="num">${total}</div><div class="lbl">Total Tickets</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--alta)">${alta}</div><div class="lbl">Alta Prioridad</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--med)">${t.filter(x=>x.estado==="En proceso").length}</div><div class="lbl">En Proceso</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--baja)">${resol}%</div><div class="lbl">% Resueltos</div></div>`;
+  document.getElementById("dash-cat").innerHTML=barHTML(count(t,"cat"),total,k=>k==="ZYN"?"#0EA5E9":"#8B5CF6");
+  document.getElementById("dash-prio-donut").innerHTML=donutHTML(count(t,"prioridad"),total,k=>k&&k.includes("Alta")?"var(--alta)":k&&k.includes("Media")?"var(--med)":"var(--baja)");
+  document.getElementById("dash-estado").innerHTML=barHTML(count(t,"estado"),total,k=>k==="Cerrado"?"#6B7280":k==="Abierto"?"#1E40AF":k==="Escalado"?"var(--alta)":"var(--med)");
+  document.getElementById("dash-merch").innerHTML=barHTML(count(t,"merch").slice(0,8),total,()=>"var(--bm)");
+  trendHTML(myTickets()); // trend siempre muestra todos los meses
+  const upd=document.getElementById("dash-update");
+  if(upd) upd.textContent="Actualizado: "+new Date().toLocaleTimeString("es-AR");
 }
 
-async function borrarTicket(id){
-  if(!confirm(`¿Borrar el ticket ${id}? Esta acción no se puede deshacer.`)) return;
-  allTickets = allTickets.filter(x=>x.id!==id);
-  await saveTickets();
-  showToast(`Ticket ${id} eliminado.`,"ok");
+// CALENDAR
+function calNav(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
+
+function renderCalendar(){
+  const months=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  document.getElementById("cal-title").textContent=`${months[calMonth]} ${calYear}`;
+  const grid=document.getElementById("cal-grid");
+  const days=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+  let html=days.map(d=>`<div class="cal-day-name">${d}</div>`).join("");
+  const first=new Date(calYear,calMonth,1).getDay();
+  const last=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  // tickets by date
+  const byDate={};
+  myTickets().forEach(t=>{
+    if(t.fechaISO){const k=t.fechaISO;byDate[k]=byDate[k]||[];byDate[k].push(t);}
+  });
+  for(let i=0;i<first;i++) html+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=last;d++){
+    const iso=`${calYear}-${String(calMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const ts=byDate[iso]||[];
+    const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
+    const dots=ts.slice(0,5).map(t=>`<span class="dot ${t.prioKey||""}"></span>`).join("");
+    html+=`<div class="cal-day ${isToday?"today":""} ${ts.length?"has-tickets":""}" ${ts.length?`onclick="showDayModal('${iso}')"`:""}><div class="day-num">${d}</div>${dots}</div>`;
+  }
+  grid.innerHTML=html;
 }
 
-async function saveTickets(){
+function showDayModal(iso){
+  const ts=myTickets().filter(t=>t.fechaISO===iso);
+  const [y,m,d]=iso.split("-");
+  const fecha=new Date(y,m-1,d).toLocaleDateString("es-AR",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  document.getElementById("modal-title").textContent=`📅 ${fecha} (${ts.length} ticket${ts.length!==1?"s":""})`;
+  document.getElementById("modal-body").innerHTML=ts.map(t=>{
+    const bp=t.prioridad&&t.prioridad.includes("Alta")?"b-alta":t.prioridad&&t.prioridad.includes("Media")?"b-media":"b-baja";
+    return`<div class="ticket-mini"><strong>${t.id}</strong> — ${t.razon}<br><span style="color:var(--g400);font-size:.76rem">${t.caso} | ${t.merch}</span><br><span class="badge ${bp}" style="font-size:.65rem">${t.prioridad}</span> <span class="badge b-abierto" style="font-size:.65rem">${t.estado}</span></div>`;
+  }).join("");
+  document.getElementById("modal-overlay").classList.add("open");
+}
+function closeModal(e){if(!e||e.target===document.getElementById("modal-overlay")) document.getElementById("modal-overlay").classList.remove("open");}
+
+async function cerrar(id){
+  const t=allTickets.find(x=>x.id===id);if(!t)return;
+  t.estado="Cerrado";t.cierre=new Date().toLocaleDateString("es-AR");
+  await save();showToast(`Ticket ${id} cerrado.`,"ok");
+}
+async function borrar(id){
+  if(!confirm(`¿Borrar el ticket ${id}? No se puede deshacer.`))return;
+  allTickets=allTickets.filter(x=>x.id!==id);
+  await save();showToast(`Ticket ${id} eliminado.`,"ok");
+}
+async function save(){
   await fetch(BASE_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":API_KEY},body:JSON.stringify({tickets:allTickets})});
-  updateStats();
-  renderTable();
+  updateStats();renderTable();renderDashboard();renderCalendar();
 }
 
 function downloadCSV(){
-  if(!allTickets.length){showToast("No hay tickets para exportar.","err");return;}
-  const headers=["ID Ticket","Fecha Apertura","Posis","Razón Social","Merch","Caso","Categoría","Prioridad","Estado","Responsable","Tickets Relacionados","Fecha Cierre","Tiempo Resp.(h)","Notas","Satisfacción"];
-  const rows=allTickets.map(t=>[
-    t.id,t.fecha,t.posis,t.razon,t.merch,t.caso,t.cat,
-    t.prioridad,t.estado,t.responsable,t.relacionados,
-    t.cierre,t.tiempo,t.notas,t.satisfaccion
-  ].map(v=>`"${String(v||"").replace(/"/g,'""')}"`).join(","));
-  const csv=[headers.join(","),...rows].join("\n");
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"}));
-  a.download=`tickets_goopen_${new Date().toISOString().split("T")[0]}.csv`;
-  a.click();
+  const t=myTickets();if(!t.length){showToast("No hay tickets.","err");return;}
+  const h=["ID Ticket","Fecha Apertura","Posis","Razón Social","Nombre","Caso","Categoría","Prioridad","Estado","Responsable","Tickets Relacionados","Fecha Cierre","Tiempo Resp.(h)","Notas","Satisfacción"];
+  const rows=t.map(x=>[x.id,x.fecha,x.posis,x.razon,x.merch,x.caso,x.cat,x.prioridad,x.estado,x.responsable,x.relacionados,x.cierre,x.tiempo,x.notas,x.satisfaccion].map(v=>`"${String(v||"").replace(/"/g,'""')}"`).join(","));
+  const csv=[h.join(","),...rows].join("\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"}));a.download=`tickets_goopen_${new Date().toISOString().split("T")[0]}.csv`;a.click();
 }
 
-function showToast(msg,type){
-  const t=document.getElementById("toast");
-  t.textContent=msg; t.className="toast "+type;
-  setTimeout(()=>t.className="toast",5000);
+function showTab(id,el){
+  document.querySelectorAll(".tab-content").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  el.classList.add("active");
+  if(id==="tab-dashboard") renderDashboard();
+  if(id==="tab-calendario") renderCalendar();
 }
+
+function showToast(msg,type){const t=document.getElementById("toast");t.textContent=msg;t.className="toast "+type;setTimeout(()=>t.className="toast",5000);}
 </script>
 </body>
 </html>
